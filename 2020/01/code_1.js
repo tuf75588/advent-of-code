@@ -1,4 +1,4 @@
-(function main(comboSize) {
+(function main() {
   try {
     const numbersInput = extractTextInput();
     const map_two = sequenceTwoForAddition(numbersInput);
