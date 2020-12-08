@@ -1,41 +1,25 @@
 (function main(comboSize) {
-  const COMBO_SIZE_TO_PRODUCT = new Map();
-  COMBO_SIZE_TO_PRODUCT.set(2, getComboSizeTwo);
-  COMBO_SIZE_TO_PRODUCT.set(3, getComboSizeThree);
-
   try {
-    const nums = extractInput();
-    const sizeTwo = buildLookupComboSizeTwo(nums);
-    console.log(sizeTwo);
+    const numbersInput = extractTextInput();
+    const map_two = sequenceTwoForAddition(numbersInput);
   } catch (error) {
     console.error(error);
   }
 })();
 
-function extractInput() {
+function extractTextInput() {
   return require('fs')
     .readFileSync(require('path').join(__dirname, 'input.txt'))
     .toString()
     .split('\n')
-    .map((line) => +line);
+    .map((line) => Number(line));
 }
 
-function buildLookupComboSizeTwo(nums) {
-  return nums.reduce((acc, num) => ({ ...acc, [num]: 2020 - num }), {});
-}
-
-function buildLookupComboSizeThree(nums) {
-  return nums.reduce(
-    (acc, num) => ({
-      ...acc,
-      [num]: nums.reduce(
-        (acc2, num2) => ({
-          ...acc2,
-          [nums2]: 2020 - num - num2,
-        }),
-        {}
-      ),
-    }),
-    {}
-  );
+function sequenceTwoForAddition(nums) {
+  for (let i = 0; i < nums.length; i++) {
+    let difference = 2020 - nums[i];
+    if (nums.includes(difference)) {
+      return nums[i] * difference;
+    }
+  }
 }
