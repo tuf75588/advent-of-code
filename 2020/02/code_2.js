@@ -1,19 +1,20 @@
-(async function main() {
-  const fs = await require('fs');
+const fs = require('fs');
+function main() {
   const passwords = extractData();
-  const check = passwords
-    .map((line, i) => {
-      const count = line.sequence[line.letter];
-
-      if (count >= line.min && count <= line.max && count !== undefined) {
-        return { ...line, valid: true };
-      }
-      return { ...line, valid: false };
-    })
-    .filter((x) => x.valid === true).length;
-  console.log(check);
-})();
-
+  let transform;
+  transform = passwords.map((element, index) => {
+    const { sequence } = element;
+    // first part
+    const transforms = sequence
+      .map((letter, i) => ({ letter, pos: i + 1 }))
+      .filter((obj) => obj.letter === element.letter);
+    return transforms.filter((x) => {
+      return x.pos === element.min || x.pos === element.max;
+    });
+  });
+  const final = transform.filter((item) => item.length === 1);
+  console.log(final.length);
+}
 function extractData() {
   return fs
     .readFileSync(require('path').join(__dirname, 'input.txt'))
@@ -26,7 +27,7 @@ function extractData() {
         min: Number(minMaxFormat[0]),
         max: Number(minMaxFormat[1]),
         letter: letter.replace(':', ''),
-        sequence: checkForValid(sequence),
+        sequence: sequence.split(''),
       };
     });
 }
@@ -41,3 +42,5 @@ function checkForValid(inputArray) {
     return acc;
   }, {});
 }
+
+main();
