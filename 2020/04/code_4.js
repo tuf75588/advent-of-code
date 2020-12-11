@@ -2,8 +2,7 @@ function extractInput() {
   return require('fs')
     .readFileSync(require('path').join(__dirname, 'input.txt'))
     .toString()
-    .split('\n')
-    .map((passport) => ({ passport }));
+    .split('\n\n');
 }
 
 const sampleData = `
@@ -21,13 +20,29 @@ hgt:179cm
 hcl:#cfa07d eyr:2025 pid:166559648
 iyr:2011 ecl:brn hgt:59in`;
 
+const input = extractInput();
 // split this text into a list of entries
-const inputSampleList = sampleData.trim().split('\n\n');
 
-//split entries into lines
-const lineList = inputSampleList.map((entry) => entry.split('\n'));
-// convert lines into arrays
-console.log(lineList);
-// combine the arrays into a single array
+// using replace
+// replace new lines with spaces, then split on each space
+// each array index will be a set with passport abbreviation as key
 
+// cid can be treated as optional so I won't include it, but all others are required to be considered valid
+const properties = ['byr', 'iyr', 'eyr', 'hgt', 'hcl', 'ecl', 'pid'];
+
+const entryArrays = input.map(
+  (entry) =>
+    new Set(
+      entry
+        .replace(/\n/g, ' ')
+        .split(' ')
+        .map((keyValuePair) => keyValuePair.split(':')[0])
+    )
+);
 // convert the resulting array into a set
+
+const legalCount = entryArrays
+  .map((element, i) => properties.every((x) => element.has(x)))
+  .filter((bool) => bool).length;
+
+// 228
