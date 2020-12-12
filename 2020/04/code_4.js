@@ -1,3 +1,5 @@
+const { access } = require('fs');
+
 function extractInput() {
   return require('fs')
     .readFileSync(require('path').join(__dirname, 'input.txt'))
@@ -41,8 +43,32 @@ const entryArrays = input.map(
 );
 // convert the resulting array into a set
 
-const legalCount = entryArrays
-  .map((element, i) => properties.every((x) => element.has(x)))
-  .filter((bool) => bool).length;
+const legalCount = entryArrays.filter((element, i) =>
+  properties.every((x) => element.has(x))
+).length;
 
 // 228
+
+/* PART TWO */
+
+const entryArrays2 = input.map((entry) =>
+  entry
+    .replace(/\n/g, ' ')
+    .split(' ')
+    .map((keyValuePair) => keyValuePair.split(':'))
+    .reduce((obj, [key, value]) => ({ ...obj, [key]: value }), {})
+);
+
+// validator functions
+
+// for each object, check if all the required fields are there
+const entrySet = entryArrays2
+  .filter((obj) => {
+    const keys = Object.keys(obj);
+    return keys.every((item) => {
+      return properties.includes(item) && obj.hasOwnProperty(properties);
+    });
+  })
+  .map((list) => list);
+
+console.log(entrySet);
