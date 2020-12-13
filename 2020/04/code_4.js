@@ -61,14 +61,51 @@ const entryArrays2 = input.map((entry) =>
 
 // validator functions
 
-// for each object, check if all the required fields are there
-const entrySet = entryArrays2
-  .filter((obj) => {
-    const keys = Object.keys(obj);
-    return keys.every((item) => {
-      return properties.includes(item) && obj.hasOwnProperty(properties);
-    });
-  })
-  .map((list) => list);
+function completenessCheck(obj) {
+  return properties.every((key) => key in obj);
+}
 
-console.log(entrySet);
+// for each object, check if all the required fields are there
+
+function checkInRange(numString, min, max) {
+  const num = parseInt(numString);
+  return min <= num && num <= max;
+}
+
+function validityCheck({ byr, iyr, eyr, hgt, hcl, ecl, pid }) {
+  // return a new object
+  const byrCheck = checkInRange(byr, 1920, 2002);
+  const iyrCheck = checkInRange(iyr, 2010, 2020);
+  const eyrCheck = checkInRange(eyr, 2020, 2030);
+  const eclCheck = /^(?:amb|blu|brn|gry|grn|hzl|oth)$/g.test(ecl);
+  const unit = hgt.slice(-2);
+  const hgtCheck =
+    unit === 'cm' ? checkInRange(hgt, 150, 193) : checkInRange(hgt, 59, 76);
+  const hclCheck = /^#[0-9A-F]{6}$/i.test(hcl);
+  const pidCheck = /^\d{9}$/.test(pid);
+  const results = {
+    byrCheck,
+    iyrCheck,
+    eyrCheck,
+    eclCheck,
+    hgtCheck,
+    hclCheck,
+    pidCheck,
+  };
+  // return (
+  //   byrCheck &&
+  //   iyrCheck &&
+  //   eyrCheck &&
+  //   eclCheck &&
+  //   hgtCheck &&
+  //   hclCheck &&
+  //   pidCheck
+  // );
+  return Object.values(results).every((bool) => bool);
+}
+
+const completeValues = entryArrays2.filter((entry) => {
+  return completenessCheck(entry) && validityCheck(entry);
+}).length;
+
+console.log(completeValues);
