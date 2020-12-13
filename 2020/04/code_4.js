@@ -1,5 +1,3 @@
-const { access } = require('fs');
-
 function extractInput() {
   return require('fs')
     .readFileSync(require('path').join(__dirname, 'input.txt'))
