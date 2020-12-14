@@ -1,24 +1,36 @@
 const sampleSeatingData = `
 BFFFBBFRRR
 FFFBBBFRRR
-BFFFBBFRRR
+BBFFBBFRLL
 `;
 //represents some integer between 1 and 7 inclusively
-let responseText = sampleSeatingData;
+const colLegend = { R: 1, L: 0 };
+const rowLegend = { B: 1, F: 0 };
 const passes = responseText.trim().split('\n');
 // for each boarding pass
 
 function processPass(pass) {
-  const rowPart = passes.slice(0, 7);
-  const colPart = passes.slice(7);
+  const rowPart = pass.slice(0, 7);
+  const colPart = pass.slice(7);
+  // for each part, convert to binary (0's and 1's)
+  const colBinary = colPart.replace(/./g, (char) =>
+    char in colLegend ? colLegend[char] : ''
+  );
+  const rowBinary = rowPart.replace(/./g, (char) =>
+    char in rowLegend ? rowLegend[char] : ''
+  );
+  // convert binary to decimal
+  let rowDecimal = parseInt(rowBinary, 2);
+  let colDecimal = parseInt(colBinary, 2);
+  // get the seatId by combining these numbers
+  return { rowDecimal, colDecimal };
 }
 
-// divide it into row and col parts
-const firstHalf = sampleSeatingData.slice(0, 7);
-const lastHalf = sampleSeatingData.slice(-4);
+const seatIds = passes.map((x) => {
+  const obj = processPass(x);
+  const { rowDecimal, colDecimal } = obj;
+  const product = rowDecimal * 8 + colDecimal;
+  return product;
+});
 
-// for each part, convert to binary (0's and 1's)
-
-// convert binary to decimal
-
-// get the seatId by combining the numbers
+let maxId = Math.max(...seatIds);
