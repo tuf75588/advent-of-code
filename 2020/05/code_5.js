@@ -4,33 +4,38 @@ FFFBBBFRRR
 BBFFBBFRLL
 `;
 //represents some integer between 1 and 7 inclusively
-const colLegend = { R: 1, L: 0 };
-const rowLegend = { B: 1, F: 0 };
-const passes = responseText.trim().split('\n');
+
+const legend = { B: 1, F: 0, R: 1, L: 0 };
 // for each boarding pass
 
 function processPass(pass) {
-  const rowPart = pass.slice(0, 7);
-  const colPart = pass.slice(7);
   // for each part, convert to binary (0's and 1's)
-  const colBinary = colPart.replace(/./g, (char) =>
-    char in colLegend ? colLegend[char] : ''
-  );
-  const rowBinary = rowPart.replace(/./g, (char) =>
-    char in rowLegend ? rowLegend[char] : ''
-  );
   // convert binary to decimal
-  let rowDecimal = parseInt(rowBinary, 2);
-  let colDecimal = parseInt(colBinary, 2);
   // get the seatId by combining these numbers
-  return { rowDecimal, colDecimal };
+  return parseInt(
+    pass.replace(/./g, (char) => (char in legend ? legend[char] : '')),
+    2
+  );
 }
 
-const seatIds = passes.map((x) => {
-  const obj = processPass(x);
-  const { rowDecimal, colDecimal } = obj;
-  const product = rowDecimal * 8 + colDecimal;
-  return product;
-});
+// find the seatIds that are spaced out by exactly 2
+const inputPasses = extractInput();
+const seatIds = inputPasses.map(processPass);
+const maxId = Math.max(...seatIds);
+/* 
+PART 2
+*/
 
-let maxId = Math.max(...seatIds);
+function extractInput() {
+  return require('fs')
+    .readFileSync(require('path').join(__dirname, 'input.txt'))
+    .toString()
+    .split('\n')
+    .map((line) => line);
+}
+
+const sortedSeatIds = [...seatIds].sort((a, b) => a - b);
+const candidates = sortedSeatIds.filter((id, index) => {
+  return sortedSeatIds[index + 1] - id === 2;
+});
+// make sure to add 1 for correct answer
