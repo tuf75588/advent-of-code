@@ -1,3 +1,4 @@
+const { group } = require('console');
 const { readFile } = require('fs/promises');
 const path = require('path').join(__dirname, 'input.txt');
 (async function main() {
@@ -22,7 +23,16 @@ const path = require('path').join(__dirname, 'input.txt');
   */
   const bagGraph = {};
   for (const rule of responseText) {
-    return;
+    const re = /(.+) bags contain (.+)\./;
+    const [_, outerBag, innerBagList] = rule.match(re);
+    const innerBags = {};
+    // loop again
+    if (innerBagList !== 'no other bags') {
+      for (const innerBag of innerBagList.split(',')) {
+        const [_, numString, innerColor] = innerBag.match(/(\d+) (.+) bag/);
+        console.log({ numString, innerColor });
+      }
+    }
+    bagGraph[outerBag] = innerBags;
   }
-  console.log(bagGraph);
 })();
