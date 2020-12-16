@@ -26,6 +26,10 @@ const path = require('path').join(__dirname, 'input.txt');
     .map((group) => group.split('\n'));
   const letterCount = groups.map(countLetters).reduce((a, b) => a + b, 0);
   // answer is 6578
+
+  let letterCount2 = groups.map(countLetter2);
+  const partTwo = groups.map(countLetters3).reduce((a, b) => a + b);
+  console.log(partTwo);
 })();
 
 /** @param string[] group - individual array element full of strings */
@@ -43,4 +47,22 @@ function countLetters(group) {
     }
   });
   return letterSet.size;
+}
+
+/* alternative solution */
+
+function countLetter2(group) {
+  const sets = group.map((line) => new Set(line));
+  return [...'abcdefghijklmnopqrstuvwxyz'].filter((line) =>
+    sets.some((x) => x.has(line))
+  );
+}
+
+/* PART 2 */
+
+function countLetters3(group) {
+  const sets = group.map((line) => new Set(line));
+  return [...'abcdefghijklmnopqrstuvwxyz'].filter((line) =>
+    sets.every((x) => x.has(line))
+  ).length;
 }
