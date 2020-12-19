@@ -29,17 +29,36 @@ acc +6
       };
     });
 
-  const runProgram = (instructions, index = 0, visited = new Set()) => {
-    const { type, num } = instructions[index];
+  const runProgram = (
+    instructions,
+    accumulator = 0,
+    index = 0,
+    visited = new Set()
+  ) => {
+    const { type, num } = instructions[index] ?? {};
     const nextVisited = new Set([...visited, index]);
 
     return visited.has(index)
-      ? 0
+      ? -1
+      : index === instructions.length
+      ? accumulator
       : type === 'acc'
-      ? num + runProgram(instructions, index + 1, nextVisited)
+      ? runProgram(instructions, accumulator + num, index + 1, nextVisited)
       : type === 'jmp'
-      ? runProgram(instructions, index + num, nextVisited)
-      : runProgram(instructions, index + 1, nextVisited);
+      ? runProgram(instructions, accumulator, index + num, nextVisited)
+      : runProgram(instructions, accumulator, index + 1, nextVisited);
   };
-  console.log(runProgram(instructions));
+
+  for (let i = 0; i < instructions.length; i++) {
+    const { type, num } = instructions[i];
+    if (type === 'nop') {
+      const newInstructions = [...instructions];
+      newInstructions[i] = { type: 'jmp', num };
+      console.log(runProgram(newInstructions));
+    } else if (type === 'jmp') {
+      const newInstructions = [...instructions];
+      newInstructions[i] = { type: 'nop', num };
+      console.log(runProgram(newInstructions));
+    }
+  }
 })();
