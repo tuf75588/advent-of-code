@@ -7,6 +7,7 @@ const path = require('path').join(__dirname, 'input.txt');
     .toString()
     .split('\n')
     .map((line) => +line);
+  console.log(findInvalidNumbers(input, 25));
 })();
 
 function arrayOverlap(arr1, arr2) {
@@ -16,5 +17,12 @@ function arrayOverlap(arr1, arr2) {
 function findInvalidNumbers(numbers, previousSize) {
   for (let i = previousSize; i < numbers.length; i++) {
     let previousNumbers = numbers.slice(i - previousSize, i);
+
+    let previousNumbersDifference = previousNumbers.map((prevNum) => {
+      return numbers[i] - prevNum;
+    });
+    if (arrayOverlap(previousNumbers, previousNumbersDifference).length === 0) {
+      return numbers[i];
+    }
   }
 }
