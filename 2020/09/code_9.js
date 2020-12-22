@@ -6,36 +6,38 @@ const path = require('path').join(__dirname, 'input.txt');
     .readFileSync(path)
     .toString()
     .split('\n')
-    .map((line) => +line);
-  console.log(findInvalidNumbers(input, 25));
-  const [index, invalidNumber] = findInvalidNumbers(input, 25);
-  let set = findContiguousSet(input.slice(0, 25), invalidNumber);
+    .map((line) => parseInt(line));
+
+  const [idx, invalidNumber] = findInvalidNumber(input, 25);
+  let set = findContiguousSet(input.slice(0, idx), invalidNumber);
   set.sort();
+  console.log(set[0] + set[set.length - 1]);
 })();
 
 function arrayOverlap(arr1, arr2) {
   return arr1.filter((item) => arr2.includes(item));
 }
 
-function findInvalidNumbers(numbers, previousSize) {
-  for (let i = previousSize; i < numbers.length; i++) {
-    let previousNumbers = numbers.slice(i - previousSize, i);
+function findInvalidNumber(numbers, prevSize) {
+  for (let i = prevSize; i < numbers.length; i++) {
+    let prevNumbers = numbers.slice(i - prevSize, i);
 
-    let previousNumbersDifference = previousNumbers.map((prevNum) => {
+    let prevNumberDiffs = prevNumbers.map((prevNum) => {
       return numbers[i] - prevNum;
     });
-    if (arrayOverlap(previousNumbers, previousNumbersDifference).length === 0) {
-      return numbers[i];
+
+    if (arrayOverlap(prevNumbers, prevNumberDiffs).length === 0) {
+      return [i, numbers[i]];
     }
   }
 }
-function findContiguousSet(numbers, sumNumbers) {
+function findContiguousSet(numbers, sumNum) {
   for (let i = 0; i < numbers.length; i++) {
-    for (let j = 0; j < numbers.length; j++) {
+    for (let j = i; j < numbers.length; j++) {
       let slice = numbers.slice(i, j + 1);
-      let sum;
+
       sum = slice.reduce((a, b) => a + b);
-      if (sum === sumNumbers) {
+      if (sum === sumNum) {
         return slice;
       }
     }
