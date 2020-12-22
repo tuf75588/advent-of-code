@@ -10,8 +10,8 @@ const path = require('path').join(__dirname, 'input.txt');
 
   const [idx, invalidNumber] = findInvalidNumber(input, 25);
   let set = findContiguousSet(input.slice(0, idx), invalidNumber);
-  set.sort();
-  console.log(set[0] + set[set.length - 1]);
+  let sum = Math.max(...set) + Math.min(...set);
+  console.log(sum);
 })();
 
 function arrayOverlap(arr1, arr2) {
