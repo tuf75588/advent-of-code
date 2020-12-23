@@ -1,22 +1,28 @@
 const fs = require('fs');
 const path = require('path').join(__dirname, 'input.txt');
-
-const numbers = fs
-  .readFileSync(path)
-  .toString()
+let input = fs
+  .readFileSync(path, 'utf-8')
   .split('\n')
-  .map((number) => +number);
+  .map((x) => Number(x))
+  .sort((a, b) => a - b);
 
-numbers.sort((a, b) => a - b);
+// Part1
+let diff = [0, 0, 1];
+for (let i = 0; i < input.length; i++) {
+  diff[input[i] - input[i - 1] - 1 || 0]++;
+}
 
-let diffs = numbers.map((number, i) => {
-  if (i - 1 >= 0) {
-    return number - numbers[i - 1];
-  } else {
-    return number;
-  }
-});
+console.log(`Part 1: ${diff[0] * diff[2]}`);
 
-let ones = diffs.filter((num) => num === 1);
-let threes = diffs.filter((num) => num === 3);
-console.log(ones.length * threes.length);
+// Part 2
+let combinations = input
+  .reduce(
+    (a, b) => {
+      a[b] = (a[b - 3] || 0) + (a[b - 2] || 0) + (a[b - 1] || 0);
+      return a;
+    },
+    [1]
+  )
+  .pop();
+
+console.log(`Part 2: ${combinations}`);
