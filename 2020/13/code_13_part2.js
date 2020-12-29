@@ -1,6 +1,4 @@
-const { EALREADY } = require('constants');
 const fs = require('fs');
-const { parse } = require('path');
 const path = require('path').join(__dirname, 'input.txt');
 
 const sequence = fs.readFileSync(path).toString().split('\n');
