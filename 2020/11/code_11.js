@@ -6,21 +6,20 @@ let rows = fs
   .toString()
   .split('\n');
 
-const sampleInput = `
-L.LL.LL.LL
-LLLLLLL.LL
-L.L.L..L..
-LLLL.LL.LL
-L.LL.LL.LL
-L.LLLLL.LL
-..L.L.....
-LLLLLLLLLL
-L.LLLLLL.L
-L.LLLLL.LL
-`;
+// let rows = `L.LL.LL.LL
+// LLLLLLL.LL
+// L.L.L..L..
+// LLLL.LL.LL
+// L.LL.LL.LL
+// L.LLLLL.LL
+// ..L.L.....
+// LLLLLLLLLL
+// L.LLLLLL.L
+// L.LLLLL.LL`.split("\n");
 
 function step(rows) {
-  let newRows = new Array(rows.length).fill('');
+  let newRows = Array(rows.length).fill('');
+
   for (let i = 0; i < rows.length; i++) {
     for (let j = 0; j < rows[i].length; j++) {
       if (rows[i][j] === '.') {
@@ -32,11 +31,22 @@ function step(rows) {
       }
     }
   }
+
   return newRows;
 }
 
 function noAdjacentSeats(rows, i, j) {
   let takenSeats = 0;
+
+  // top-left -1 -1
+  // top -1 0
+  // top-right -1 1
+  // left 0 -1
+  // right 0 1
+  // bottom-left 1 -1
+  // bottom 1 0
+  // bottom-right 1 1
+
   for (let iAdd = -1; iAdd < 2; iAdd++) {
     for (let jAdd = -1; jAdd < 2; jAdd++) {
       if (iAdd === 0 && jAdd === 0) continue;
@@ -50,6 +60,7 @@ function noAdjacentSeats(rows, i, j) {
       }
     }
   }
+
   if (takenSeats === 0) {
     return '#';
   } else {
@@ -57,8 +68,18 @@ function noAdjacentSeats(rows, i, j) {
   }
 }
 
-function fourOurMore(rows, i, j) {
+function fourOrMore(rows, i, j) {
   let takenSeats = 0;
+
+  // top-left -1 -1
+  // top -1 0
+  // top-right -1 1
+  // left 0 -1
+  // right 0 1
+  // bottom-left 1 -1
+  // bottom 1 0
+  // bottom-right 1 1
+
   for (let iAdd = -1; iAdd < 2; iAdd++) {
     for (let jAdd = -1; jAdd < 2; jAdd++) {
       if (iAdd === 0 && jAdd === 0) continue;
@@ -89,3 +110,10 @@ while (true) {
     rows = newRows;
   }
 }
+
+console.log(
+  rows
+    .join('')
+    .split('')
+    .filter((spot) => spot === '#').length
+);
