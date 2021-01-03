@@ -1,106 +1,150 @@
 const fs = require('fs');
-const { parse } = require('path');
+const path = require('path').join(__dirname, 'input.txt');
+const lines = fs.readFileSync(path).toString().split('\n');
+const iterAmt = 6;
+// make a list of points to add at first
+let startPoints = [];
+// could do forEach() instead of map() but i already did it like this and it works
+startGrid = lines.map((line, y) =>
+  line.split('').map((point, x) => {
+    if (point == '#') {
+      startPoints.push([iterAmt + x, iterAmt + y, iterAmt]);
+    }
+    return point == '#';
+  })
+);
+// start with zero active cubes
+let runningTotal = 0;
+// create an empty pocket dimension
+let p = new Pocket();
+// add the points from the input
+startPoints.forEach((point) => add(...point, p));
 
-const lines = fs
-  .readFileSync(require('path').join(__dirname, 'input.txt'))
-  .toString()
-  .split('\n')
-  .filter((x) => x)
-  .map((x) => [...x]);
+for (let i = 0; i < iterAmt; i++) {
+  printLayer(p, iterAmt);
 
-let map = new Map(); // key: x,y,z,w value: active/inactive
+  // create a deep copy of the current state
+  let next = p.map((layer) =>
+    layer.map((row) =>
+      row.map((cube) => {
+        return { active: cube.active, nearby: cube.nearby };
+      })
+    )
+  );
 
-// initialize the map
-
-lines.forEach((line, y) => {
-  line.forEach((value, x) => {
-    const active = value === '#';
-    const id = [x, y, 0, 0].join`,`;
-    map.set(id, active);
-  });
-});
-
-function getNeighbors(x, y, z, w, map) {
-  const result = [];
-  for (let i = x - 1; i <= x + 1; i++) {
-    for (let j = y - 1; j <= y + 1; j++) {
-      for (let k = z - 1; k <= z + 1; k++) {
-        for (let l = w - 1; l <= w + 1; l++) {
-          if (i != x || j != y || k != z || l != w) {
-            const key = [i, j, k, l].join`,`;
-            // if(x == 0 && y == 0 && z == 0) {
-            //     console.log(key, map.has(key));
-            // }
-            // console.log(key, map.has(key));
-            if (map.has(key)) {
-              result.push(map.get(key));
-            } else {
-              result.push(false);
-            }
-          }
+  // for every single cube in the pocket dimension
+  p.forEach((layer, z) =>
+    layer.forEach((row, y) =>
+      row.forEach((cube, x) => {
+        // apply the game of life rules using p and store in next
+        if (cube.active && (cube.nearby < 2 || cube.nearby > 3)) {
+          remove(x, y, z, p, next);
+        } else if (!cube.active && cube.nearby == 3) {
+          add(x, y, z, p, next);
         }
+      })
+    )
+  );
+
+  p = next;
+}
+
+console.log(runningTotal);
+
+// -------------------------------
+
+function printLayer(pocket, layer) {
+  console.log(
+    pocket[layer].reduce(
+      (a, b) =>
+        a +
+        b.reduce(
+          (c, d) =>
+            c +
+            (d.active ? '\x1b[36m' : '\x1b[0m') +
+            (d.nearby.toString().length == 1 ? '0' : '') +
+            d.nearby,
+          ''
+        ) +
+        '\n',
+      ''
+    )
+  );
+}
+
+// returns empty pocket dimension
+function Pocket() {
+  let pocket = [];
+  for (let z = 0; z < iterAmt * 2 + 1; z++) {
+    let layer = [];
+    for (let y = 0; y < iterAmt * 2 + startGrid.length; y++) {
+      let row = [];
+      row = Array(iterAmt * 2 + startGrid[0].length)
+        .fill(0)
+        .map(() => {
+          return { active: false, nearby: 0 };
+        });
+      layer.push(row);
+    }
+    pocket.push(layer);
+  }
+  return pocket;
+}
+
+function add(x, y, z, before, after = before) {
+  if (before[z][y][x].active) return before; // if it's already active, do nothing
+  runningTotal++;
+  after[z][y][x].active = true;
+  // for every cube near the one we just added
+  for (
+    let layer = Math.max(z - 1, 0);
+    layer <= Math.min(z + 1, before.length - 1);
+    layer++
+  ) {
+    for (
+      let row = Math.max(y - 1, 0);
+      row <= Math.min(y + 1, before[0].length - 1);
+      row++
+    ) {
+      for (
+        let col = Math.max(x - 1, 0);
+        col <= Math.min(x + 1, before[0][0].length - 1);
+        col++
+      ) {
+        // but not the one we just added
+        if (layer == z && row == y && col == x) continue;
+        // there now is one more nearby cube
+        after[layer][row][col].nearby++;
       }
     }
   }
-  return result;
+  return after;
 }
 
-for (let i = 0; i < 6; i++) {
-  // turn
-
-  //find min-max for x,y,z
-  const keys = map.keys();
-  let minx = null;
-  let miny = null;
-  let minz = null;
-  let minw = null;
-  let maxx = null;
-  let maxy = null;
-  let maxz = null;
-  let maxw = null;
-
-  for (const key of keys) {
-    const [x, y, z, w] = key.split(',').map((x) => parseInt(x));
-    if (x < minx) minx = x;
-    if (y < miny) miny = y;
-    if (z < minz) minz = z;
-    if (w < minw) minw = w;
-    if (x > maxx) maxx = x;
-    if (y > maxy) maxy = y;
-    if (z > maxz) maxz = z;
-    if (w > maxw) maxw = w;
-  }
-
-  const newState = new Map();
-
-  for (let x = minx - 1; x <= maxx + 1; x++) {
-    for (let y = miny - 1; y <= maxy + 1; y++) {
-      for (let z = minz - 1; z <= maxz + 1; z++) {
-        for (let w = minw - 1; w <= maxw + 1; w++) {
-          const neighbors = getNeighbors(x, y, z, w, map);
-          const activeNeighbors = neighbors.filter((x) => x).length;
-          const key = [x, y, z, w].join`,`;
-          const isActive = map.has(key) ? map.get(key) : false;
-          if (isActive && activeNeighbors !== 2 && activeNeighbors !== 3) {
-            newState.set(key, false);
-          } else if (!isActive && activeNeighbors === 3) {
-            newState.set(key, true);
-          } else {
-            newState.set(key, isActive);
-          }
-        }
+// add and remove could be combined into one function but i did it like this and it works
+function remove(x, y, z, before, after = before) {
+  if (!before[z][y][x].active) return before;
+  runningTotal--;
+  after[z][y][x].active = false;
+  for (
+    let layer = Math.max(z - 1, 0);
+    layer <= Math.min(z + 1, before.length - 1);
+    layer++
+  ) {
+    for (
+      let row = Math.max(y - 1, 0);
+      row <= Math.min(y + 1, before[0].length - 1);
+      row++
+    ) {
+      for (
+        let col = Math.max(x - 1, 0);
+        col <= Math.min(x + 1, before[0][0].length - 1);
+        col++
+      ) {
+        if (layer == z && row == y && col == x) continue;
+        after[layer][row][col].nearby--;
       }
     }
   }
-
-  map = newState;
+  return after;
 }
-
-// count active cubes
-let sum = 0;
-let cubes = map.values();
-for (const cube of cubes) {
-  if (cube) sum++;
-}
-
-console.log(sum);
